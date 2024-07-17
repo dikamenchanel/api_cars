@@ -21,10 +21,10 @@ Get Car by ID
 
 Returns details of a car based on its ID.
 
-- **URL**
+    URL
 
 GET /cars/{id}
 
-Parameters
+    Parameters
 
-  id (integer): ID of the car to retrieve.
+        id (integer): ID of the car to retrieve.
