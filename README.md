@@ -7,7 +7,8 @@
 Returns a empty array, start page.
 
 - **URL**
-    - GET   /
+    - GET
+    - ```url / ```
 
 - **Response**
 ```json
@@ -23,7 +24,8 @@ Returns a empty array, start page.
 #### Returns a list of all cars available.
 
 - **URL**
-    - GET  /cars
+    - GET
+    - ```url /cars ```
 
 - **Parameters**
     - not parameter
@@ -62,10 +64,11 @@ Returns a empty array, start page.
 #### Returns details of a car based on its ID.
 
 - **URL**
-    - GET ```url /cars/{id} ```
+    - GET
+    - ```url /cars/{id} ```
 
 - **Parameters**
-
+    - ``` id ``` (integer): ID of the car to retrieve.
 - **Response**
 
 
