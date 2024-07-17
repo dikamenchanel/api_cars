@@ -7,7 +7,7 @@
 Returns a empty array, start page.
 
 - **URL**
-  GET   /
+    - GET   /
 
 - **Response**
 ```json
@@ -21,10 +21,10 @@ Returns a empty array, start page.
 Returns a list of all cars available.
 
 - **URL**
-  GET  /cars
+    - GET  /cars
 
 - **Parameters**
-  not parameter
+    - not parameter
   
 - **Response**
 ```json
