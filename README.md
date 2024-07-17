@@ -32,7 +32,7 @@ Returns a empty array, start page.
   
 - **Response**
 ```json
-"status":"success",
+{"status":"success",
 "message":"",
 "data":[
         {
@@ -56,7 +56,9 @@ Returns a empty array, start page.
             "model":"F-150",
             "year":2016
         }
+    ]
 ....
+}
 ```
 
 ### Get Car by ID
@@ -70,7 +72,10 @@ Returns a empty array, start page.
 - **Parameters**
     - ``` id ``` (integer): ID of the car to retrieve.
 - **Response**
+```json
 
+
+```
 
 
 - **URL**
