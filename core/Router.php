@@ -7,15 +7,32 @@ use Core\Response;
 /**
  * Class Router
  *
- * Simple router implementation for handling HTTP request routing and dispatching
- * based on specified routes.
+ * Improved router implementation with security and performance enhancements.
  */
 class Router
 {
       /**
        * @var array Stores registered routes with HTTP method, path pattern, and handler.
        */
-      private static $routes = [];
+      private static array $routes = [];
+      
+      /**
+       * @var array Cached compiled routes for fast lookup.
+       */
+      private static array $cachedRoutes = [];
+      
+      /**
+       * Registers a route with the specified HTTP method, path, and handler.
+       *
+       * @param string $method The HTTP method of the route.
+       * @param string $path The route path pattern.
+       * @param array $handler The handler for the route (class and method).
+       */
+      public static function addRoute(string $method, string $path, array $handler): void
+      {
+            self::$routes[$method][$path] = $handler;
+            self::$cachedRoutes = []; // Invalidate cache
+      }
       
       /**
        * Registers a GET route with the specified path and handler.
@@ -23,7 +40,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function get($path, $handler)
+      public static function get(string $path, array $handler): void
       {
             self::addRoute('GET', $path, $handler);
       }
@@ -34,7 +51,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function post($path, $handler)
+      public static function post(string $path, array $handler): void
       {
             self::addRoute('POST', $path, $handler);
       }
@@ -45,7 +62,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function put($path, $handler)
+      public static function put(string $path, array $handler): void
       {
             self::addRoute('PUT', $path, $handler);
       }
@@ -56,25 +73,9 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function delete($path, $handler)
+      public static function delete(string $path, array $handler): void
       {
             self::addRoute('DELETE', $path, $handler);
-      }
-      
-      /**
-       * Adds a route to the internal routes array.
-       *
-       * @param string $method The HTTP method of the route.
-       * @param string $path The route path pattern.
-       * @param array $handler The handler for the route (class and method).
-       */
-      private static function addRoute($method, $path, $handler)
-      {
-            self::$routes[] = [
-                  'method' => $method,
-                  'path' => $path,
-                  'handler' => $handler
-            ];
       }
       
       /**
@@ -82,19 +83,47 @@ class Router
        *
        * @param Request $request The HTTP request object.
        */
-      public static function dispatch(Request $request)
+      public static function dispatch(Request $request): void
       {
             $requestMethod = $request->getMethod();
             $requestUri = $request->getPath();
             
-            foreach (self::$routes as $route) {
-                  if ($route['method'] === strtoupper($requestMethod) && preg_match(self::convertPathToRegex($route['path']), $requestUri, $matches)) {
+            if (!isset(self::$routes[$requestMethod])) {
+                  Response::json(['status' => 'error', 'message' => 'Method Not Allowed'], 405);
+                  return;
+            }
+            
+            $routeHandler = self::findRouteHandler($requestMethod, $requestUri);
+            if ($routeHandler) {
+                  [$handler, $params] = $routeHandler;
+                  self::executeHandler($handler, $request, $params);
+            } else {
+                  Response::json(['status' => 'error', 'message' => 'URL Not Found'], 404);
+            }
+      }
+      
+      /**
+       * Finds the route handler for the given method and URI.
+       *
+       * @param string $method The HTTP method.
+       * @param string $uri The request URI.
+       * @return array|null The route handler and parameters, or null if not found.
+       */
+      private static function findRouteHandler(string $method, string $uri): ?array
+      {
+            if (isset(self::$cachedRoutes[$method][$uri])) {
+                  return self::$cachedRoutes[$method][$uri];
+            }
+            
+            foreach (self::$routes[$method] as $path => $handler) {
+                  if (preg_match(self::convertPathToRegex($path), $uri, $matches)) {
                         array_shift($matches);
-                        return self::executeHandler($route['handler'], $request, $matches);
+                        self::$cachedRoutes[$method][$uri] = [$handler, $matches];
+                        return [$handler, $matches];
                   }
             }
             
-            Response::json(['status' => 'error', 'message' => 'URL Not Found'], 404);
+            return null;
       }
       
       /**
@@ -103,7 +132,7 @@ class Router
        * @param string $path The route path pattern.
        * @return string The regex pattern for matching the route path.
        */
-      private static function convertPathToRegex($path)
+      private static function convertPathToRegex(string $path): string
       {
             return "#^" . preg_replace('/{([^}]+)}/', '([^/]+)', $path) . "$#";
       }
@@ -114,17 +143,15 @@ class Router
        * @param array $handler The handler for the route (class and method).
        * @param Request $request The HTTP request object.
        * @param array $params The parameters extracted from the route path.
-       * @return mixed The result of the handler execution.
        */
-      private static function executeHandler($handler, Request $request, $params)
+      private static function executeHandler(array $handler, Request $request, array $params): void
       {
-            list($class, $method) = $handler;
+            [$class, $method] = $handler;
             if (class_exists($class) && method_exists($class, $method)) {
                   $controller = new $class();
-                  
-                  return call_user_func_array([$controller, $method], array_merge([$request], $params));
+                  call_user_func_array([$controller, $method], array_merge([$request], $params));
+            } else {
+                  Response::json(['status' => 'error', 'message' => 'Handler not found'], 404);
             }
-            
-            Response::json(['status' => 'error', 'message' => 'Handler not found'], 404);
       }
 }

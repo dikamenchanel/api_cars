@@ -13,34 +13,42 @@ class Request
       /**
        * @var string The path of the request URI.
        */
-      private $path;
+      private string $path;
       
       /**
        * @var string The HTTP method of the request (e.g., GET, POST, PUT, DELETE).
        */
-      private $method;
+      private string $method;
       
       /**
        * @var array The query parameters parsed from the request URI.
        */
-      private $queryParams = [];
+      private array $queryParams;
       
       /**
-       * @var array The body parameters parsed from the request body (JSON format).
+       * @var array The body parameters parsed from the request body.
        */
-      private $bodyParams = [];
+      private array $bodyParams;
+      
+      /**
+       * @var string The raw input of the request body.
+       */
+      private string $rawInput;
       
       /**
        * Request constructor.
        * Initializes the request object by parsing the URI, method, query parameters,
-       * and body parameters from the PHP environment.
+       * and body parameters from the PHP environment. It also automatically sanitizes
+       * and validates parameters to prevent XSS attacks.
        */
       public function __construct()
       {
-            $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $this->method = $_SERVER['REQUEST_METHOD'];
+            $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+            $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
             $this->queryParams = $this->parseQueryParams();
+            $this->rawInput = file_get_contents('php://input');
             $this->bodyParams = $this->parseBodyParams();
+            $this->sanitizeAndValidateParams();
       }
       
       /**
@@ -48,28 +56,65 @@ class Request
        *
        * @return array The parsed query parameters.
        */
-      private function parseQueryParams()
+      private function parseQueryParams(): array
       {
             $queryParams = [];
-            if (isset($_SERVER['QUERY_STRING'])) {
+            if (!empty($_SERVER['QUERY_STRING'])) {
                   parse_str($_SERVER['QUERY_STRING'], $queryParams);
             }
             return $queryParams;
       }
       
       /**
-       * Parses the body parameters from the request body (assumes JSON format).
+       * Parses the body parameters from the request body based on the content type.
        *
        * @return array The parsed body parameters.
        */
-      private function parseBodyParams()
+      private function parseBodyParams(): array
       {
             $bodyParams = [];
-            $input = file_get_contents('php://input');
-            if ($input) {
-                  $bodyParams = json_decode($input, true);
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            
+            if ($contentType === 'application/json') {
+                  $bodyParams = json_decode($this->rawInput, true);
+                  if (json_last_error() !== JSON_ERROR_NONE) {
+                        $bodyParams = [];
+                  }
+            } elseif ($contentType === 'application/x-www-form-urlencoded') {
+                  parse_str($this->rawInput, $bodyParams);
+            } elseif (strpos($contentType, 'multipart/form-data') === 0) {
+                  $bodyParams = $_POST;
             }
+            
             return $bodyParams;
+      }
+      
+      /**
+       * Sanitizes a string to prevent XSS attacks.
+       *
+       * @param string $input The string to sanitize.
+       * @return string The sanitized string.
+       */
+      private function sanitizeString(string $input): string
+      {
+            return htmlspecialchars($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      }
+      
+      /**
+       * Validates and sanitizes all query and body parameters to prevent XSS attacks.
+       */
+      private function sanitizeAndValidateParams()
+      {
+            foreach ($this->queryParams as $key => $value) {
+                  $this->queryParams[$key] = $this->sanitizeString($value);
+            }
+            
+            foreach ($this->bodyParams as $key => $value) {
+                  if (is_string($value)) {
+                        $this->bodyParams[$key] = $this->sanitizeString($value);
+                  }
+                  // Additional validation logic can be added here for specific types or formats
+            }
       }
       
       /**
@@ -77,7 +122,7 @@ class Request
        *
        * @return string The request path.
        */
-      public function getPath()
+      public function getPath(): string
       {
             return $this->path;
       }
@@ -87,7 +132,7 @@ class Request
        *
        * @return string The HTTP method (GET, POST, PUT, DELETE, etc.).
        */
-      public function getMethod()
+      public function getMethod(): string
       {
             return $this->method;
       }
@@ -97,7 +142,7 @@ class Request
        *
        * @return array The query parameters.
        */
-      public function getQueryParams()
+      public function getQueryParams(): array
       {
             return $this->queryParams;
       }
@@ -107,7 +152,7 @@ class Request
        *
        * @return array The body parameters.
        */
-      public function getBodyParams()
+      public function getBodyParams(): array
       {
             return $this->bodyParams;
       }
@@ -120,13 +165,9 @@ class Request
        * @param mixed $default The default value if parameter is not found.
        * @return mixed The value of the parameter.
        */
-      public function getParam($key, $default = null)
+      public function getParam(string $key, $default = null)
       {
-            if (isset($this->queryParams[$key])) {
-                  return $this->queryParams[$key];
-            } elseif (isset($this->bodyParams[$key])) {
-                  return $this->bodyParams[$key];
-            }
-            return $default;
+            return $this->queryParams[$key] ?? $this->bodyParams[$key] ?? $default;
       }
 }
+
