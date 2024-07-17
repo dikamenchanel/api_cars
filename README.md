@@ -2,7 +2,7 @@
 
 ## Car API
 
-### Get All Cars
+### Start Page
 
 Returns a empty array, start page.
 
@@ -18,7 +18,9 @@ Returns a empty array, start page.
 }
 ```
 
-Returns a list of all cars available.
+### Get All Cars
+
+#### Returns a list of all cars available.
 
 - **URL**
     - GET  /cars
@@ -55,9 +57,12 @@ Returns a list of all cars available.
 ....
 ```
 
+### Get Car by ID
+
+#### Returns details of a car based on its ID.
 
 - **URL**
-  GET  /cars
+    - GET ```url /cars/{id} ```
 
 - **Parameters**
 
