@@ -8,7 +8,7 @@ Returns a list of all cars available.
 
 - **URL**
 
-GET /cars
+GET /
 - **Response**
 ```json
 {
@@ -17,3 +17,6 @@ GET /cars
   "data": []
 }
 ```
+
+
+
