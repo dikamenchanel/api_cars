@@ -136,4 +136,11 @@ Returns a empty array, start page.
   "message": "URL Not Found"
 }
 ```
-  
+
+### Example Usage
+```bash
+curl -X GET http://example.com/api/cars
+```
+
+
+
