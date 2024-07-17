@@ -16,3 +16,15 @@ GET /cars
   "message": "Work My Rest FULL Api",
   "data": []
 }
+
+Get Car by ID
+
+Returns details of a car based on its ID.
+
+- **URL**
+
+GET /cars/{id}
+
+Parameters
+
+  id (integer): ID of the car to retrieve.
