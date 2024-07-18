@@ -28,7 +28,8 @@ Returns a empty array, start page.
     - ```url /cars ```
 
 - **Parameters**
-    - not parameter
+    - ``` page ``` (integer, optional): Serial page.
+    - ``` perPage ``` (integer, optional): Number of elements on the page.
   
 - **Response**
 ```json
@@ -62,6 +63,12 @@ Returns a empty array, start page.
 }
 ```
 
+  - Optional
+```json
+{
+    "countPage":""
+}
+```
 
 ### Get Car by ID
 

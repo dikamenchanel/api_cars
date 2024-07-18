@@ -31,18 +31,29 @@ class Database
             
             try {
                   $stmt = $this->pdo->prepare($sql);
-                  foreach ($params as $paramName => $paramValue) {
-                        if (is_int($paramValue)) {
-                              $paramType = PDO::PARAM_INT;
-                        } elseif (is_bool($paramValue)) {
-                              $paramType = PDO::PARAM_BOOL;
-                        } elseif (is_null($paramValue)) {
-                              $paramType = PDO::PARAM_NULL;
-                        } else {
-                              $paramType = PDO::PARAM_STR;
+                  if(!empty($params))
+                  {
+                        foreach ($params as $paramName => $paramValue) 
+                        {
+                              if (is_int($paramValue)) {
+                                    $paramType = PDO::PARAM_INT;
+                              } elseif (is_bool($paramValue)) {
+                                    $paramType = PDO::PARAM_BOOL;
+                              } elseif (is_null($paramValue)) {
+                                    $paramType = PDO::PARAM_NULL;
+                              } else {
+                                    $paramType = PDO::PARAM_STR;
+                              }
+                              $stmt->bindValue($paramName, $paramValue, $paramType);
                         }
-                        $stmt->bindValue($paramName, $paramValue, $paramType);
                   }
+/*
+                  // Отладочная информация: вывод SQL-запроса и параметров
+                  $debugSql = $sql;
+                  foreach ($params as $paramName => $paramValue) {
+                        $debugSql = str_replace($paramName, "'$paramValue'", $debugSql);
+                  }
+                  echo "Executing SQL: " . $debugSql . "\n";*/
 
                   $stmt->execute();
                   return $stmt;

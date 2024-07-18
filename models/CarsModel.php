@@ -97,7 +97,22 @@ class CarsModel extends DataBase
        */
       public function getPaginatedCars($offset, $perPage)
       {
-            return $this->selectMany("SELECT id, url, brand, model, year FROM cars LIMIT :offset :perPage", ["offset"=> $offset, "perPage" => $perPage]);
+            $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 300]]);
+            $perPage = filter_var($perPage, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000]]);
+            
+            return $this->selectMany("SELECT id, url, brand, model, year FROM cars LIMIT $offset, $perPage");
+      }
+      
+      /**
+       * Fetches paginated cars from the database.
+       *
+       * @return integer 
+       */
+      public function getCountRow()
+      {
+            $result = $this->selectOne("SELECT count(id) as count FROM cars");
+            
+            return $result['count'] ?? 0;
       }
       
       /**

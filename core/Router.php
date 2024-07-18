@@ -14,12 +14,12 @@ class Router
       /**
        * @var array Stores registered routes with HTTP method, path pattern, and handler.
        */
-      private static array $routes = [];
+      private static $routes = [];
       
       /**
        * @var array Cached compiled routes for fast lookup.
        */
-      private static array $cachedRoutes = [];
+      private static $cachedRoutes = [];
       
       /**
        * Registers a route with the specified HTTP method, path, and handler.
@@ -28,7 +28,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function addRoute(string $method, string $path, array $handler): void
+      public static function addRoute(string $method, string $path, array $handler)
       {
             self::$routes[$method][$path] = $handler;
             self::$cachedRoutes = []; // Invalidate cache
@@ -40,7 +40,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function get(string $path, array $handler): void
+      public static function get(string $path, array $handler)
       {
             self::addRoute('GET', $path, $handler);
       }
@@ -51,7 +51,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function post(string $path, array $handler): void
+      public static function post(string $path, array $handler)
       {
             self::addRoute('POST', $path, $handler);
       }
@@ -62,7 +62,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function put(string $path, array $handler): void
+      public static function put(string $path, array $handler)
       {
             self::addRoute('PUT', $path, $handler);
       }
@@ -73,7 +73,7 @@ class Router
        * @param string $path The route path pattern.
        * @param array $handler The handler for the route (class and method).
        */
-      public static function delete(string $path, array $handler): void
+      public static function delete(string $path, array $handler)
       {
             self::addRoute('DELETE', $path, $handler);
       }
@@ -83,7 +83,7 @@ class Router
        *
        * @param Request $request The HTTP request object.
        */
-      public static function dispatch(Request $request): void
+      public static function dispatch(Request $request)
       {
             $requestMethod = $request->getMethod();
             $requestUri = $request->getPath();
@@ -109,7 +109,7 @@ class Router
        * @param string $uri The request URI.
        * @return array|null The route handler and parameters, or null if not found.
        */
-      private static function findRouteHandler(string $method, string $uri): ?array
+      private static function findRouteHandler(string $method, string $uri)
       {
             if (isset(self::$cachedRoutes[$method][$uri])) {
                   return self::$cachedRoutes[$method][$uri];
@@ -132,7 +132,7 @@ class Router
        * @param string $path The route path pattern.
        * @return string The regex pattern for matching the route path.
        */
-      private static function convertPathToRegex(string $path): string
+      private static function convertPathToRegex(string $path)
       {
             return "#^" . preg_replace('/{([^}]+)}/', '([^/]+)', $path) . "$#";
       }
@@ -144,7 +144,7 @@ class Router
        * @param Request $request The HTTP request object.
        * @param array $params The parameters extracted from the route path.
        */
-      private static function executeHandler(array $handler, Request $request, array $params): void
+      private static function executeHandler(array $handler, Request $request, array $params)
       {
             [$class, $method] = $handler;
             if (class_exists($class) && method_exists($class, $method)) {

@@ -13,22 +13,22 @@ class Request
       /**
        * @var string The path of the request URI.
        */
-      private string $path;
+      private $path;
       
       /**
        * @var string The HTTP method of the request (e.g., GET, POST, PUT, DELETE).
        */
-      private string $method;
+      private $method;
       
       /**
        * @var array All parameters parsed from the request (query, body, and raw input).
        */
-      private array $params;
+      private $params;
       
       /**
        * @var string The raw input of the request body.
        */
-      private string $rawInput;
+      private $rawInput;
       
       /**
        * Request constructor.
@@ -49,7 +49,7 @@ class Request
        *
        * @return array The parsed parameters.
        */
-      private function parseParams(): array
+      private function parseParams()
       {
             $params = [];
             
@@ -84,7 +84,7 @@ class Request
        * @param string $input The string to sanitize.
        * @return string The sanitized string.
        */
-      private function sanitizeString(string $input): string
+      private function sanitizeString(string $input)
       {
             return htmlspecialchars($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
       }
@@ -92,7 +92,7 @@ class Request
       /**
        * Validates and sanitizes all parameters to prevent XSS attacks.
        */
-      private function sanitizeAndValidateParams(): void
+      private function sanitizeAndValidateParams()
       {
             foreach ($this->params as $key => $value) {
                   if (is_string($value)) {
@@ -107,7 +107,7 @@ class Request
        *
        * @return string The request path.
        */
-      public function getPath(): string
+      public function getPath()
       {
             return $this->path;
       }
@@ -117,7 +117,7 @@ class Request
        *
        * @return string The HTTP method (GET, POST, PUT, DELETE, etc.).
        */
-      public function getMethod(): string
+      public function getMethod()
       {
             return $this->method;
       }
@@ -127,7 +127,7 @@ class Request
        *
        * @return array The parameters.
        */
-      public function getParams(): array
+      public function getParams()
       {
             return $this->params;
       }

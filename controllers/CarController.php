@@ -49,13 +49,13 @@ class CarController
             $params = $request->getParams();
             if(!empty($params))
             {
-                  $page = (int)$params['page'] ?? 1;
-                  $perPage = (int)$params['perPage'] ?? 10;
+                  $page = (isset($params['page'])) ? (int)$params['page'] : 1;
+                  $perPage = (isset($params['perPage'])) ? (int)$params['perPage'] : 10;
                   $offset = ($page - 1) * $perPage;
                   
                   $result = $this->carsModel->getPaginatedCars($offset, $perPage);
-                 
-                  return Response::json(["status" => "success", "message" => "Get all data in Database", "data" => $result]);
+                  $countPages = ceil($this->carsModel->getCountRow() / $perPage);
+                  return Response::json(["status" => "success", "message" => "Get all data in Database", "countPages" => $countPages, "data" => $result]);
             }
             
             $result = $this->carsModel->getAllCars();
