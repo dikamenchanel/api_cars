@@ -6,7 +6,7 @@ namespace Core;
  * Class Request
  * 
  * Represents an HTTP request object, providing methods to retrieve
- * path, HTTP method, query parameters, and body parameters.
+ * path, HTTP method, and parameters (query, body, and raw input).
  */
 class Request
 {
@@ -21,14 +21,9 @@ class Request
       private string $method;
       
       /**
-       * @var array The query parameters parsed from the request URI.
+       * @var array All parameters parsed from the request (query, body, and raw input).
        */
-      private array $queryParams;
-      
-      /**
-       * @var array The body parameters parsed from the request body.
-       */
-      private array $bodyParams;
+      private array $params;
       
       /**
        * @var string The raw input of the request body.
@@ -37,56 +32,50 @@ class Request
       
       /**
        * Request constructor.
-       * Initializes the request object by parsing the URI, method, query parameters,
-       * and body parameters from the PHP environment. It also automatically sanitizes
-       * and validates parameters to prevent XSS attacks.
+       * Initializes the request object by parsing the URI, method, and parameters
+       * from the PHP environment. It also automatically sanitizes and validates
+       * parameters to prevent XSS attacks.
        */
       public function __construct()
       {
             $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
             $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-            $this->queryParams = $this->parseQueryParams();
-            $this->rawInput = file_get_contents('php://input');
-            $this->bodyParams = $this->parseBodyParams();
+            $this->params = $this->parseParams();
             $this->sanitizeAndValidateParams();
       }
       
       /**
-       * Parses the query parameters from the request URI.
+       * Parses all parameters from the request (query, body, and raw input).
        *
-       * @return array The parsed query parameters.
+       * @return array The parsed parameters.
        */
-      private function parseQueryParams(): array
+      private function parseParams(): array
       {
-            $queryParams = [];
+            $params = [];
+            
+            // Parse query parameters
             if (!empty($_SERVER['QUERY_STRING'])) {
                   parse_str($_SERVER['QUERY_STRING'], $queryParams);
+                  $params = array_merge($params, $queryParams);
             }
-            return $queryParams;
-      }
-      
-      /**
-       * Parses the body parameters from the request body based on the content type.
-       *
-       * @return array The parsed body parameters.
-       */
-      private function parseBodyParams(): array
-      {
-            $bodyParams = [];
+            
+            // Parse body parameters
+            $this->rawInput = file_get_contents('php://input');
             $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
             
             if ($contentType === 'application/json') {
                   $bodyParams = json_decode($this->rawInput, true);
-                  if (json_last_error() !== JSON_ERROR_NONE) {
-                        $bodyParams = [];
+                  if (json_last_error() === JSON_ERROR_NONE) {
+                        $params = array_merge($params, $bodyParams);
                   }
             } elseif ($contentType === 'application/x-www-form-urlencoded') {
                   parse_str($this->rawInput, $bodyParams);
+                  $params = array_merge($params, $bodyParams);
             } elseif (strpos($contentType, 'multipart/form-data') === 0) {
-                  $bodyParams = $_POST;
+                  $params = array_merge($params, $_POST);
             }
             
-            return $bodyParams;
+            return $params;
       }
       
       /**
@@ -101,17 +90,13 @@ class Request
       }
       
       /**
-       * Validates and sanitizes all query and body parameters to prevent XSS attacks.
+       * Validates and sanitizes all parameters to prevent XSS attacks.
        */
-      private function sanitizeAndValidateParams()
+      private function sanitizeAndValidateParams(): void
       {
-            foreach ($this->queryParams as $key => $value) {
-                  $this->queryParams[$key] = $this->sanitizeString($value);
-            }
-            
-            foreach ($this->bodyParams as $key => $value) {
+            foreach ($this->params as $key => $value) {
                   if (is_string($value)) {
-                        $this->bodyParams[$key] = $this->sanitizeString($value);
+                        $this->params[$key] = $this->sanitizeString($value);
                   }
                   // Additional validation logic can be added here for specific types or formats
             }
@@ -138,27 +123,17 @@ class Request
       }
       
       /**
-       * Retrieves the query parameters from the request URI.
+       * Retrieves all parameters from the request.
        *
-       * @return array The query parameters.
+       * @return array The parameters.
        */
-      public function getQueryParams(): array
+      public function getParams(): array
       {
-            return $this->queryParams;
+            return $this->params;
       }
       
       /**
-       * Retrieves the body parameters from the request body.
-       *
-       * @return array The body parameters.
-       */
-      public function getBodyParams(): array
-      {
-            return $this->bodyParams;
-      }
-      
-      /**
-       * Retrieves a specific parameter from either query or body parameters.
+       * Retrieves a specific parameter from the request.
        * If the parameter is not found, returns the default value.
        *
        * @param string $key The parameter key.
@@ -167,7 +142,6 @@ class Request
        */
       public function getParam(string $key, $default = null)
       {
-            return $this->queryParams[$key] ?? $this->bodyParams[$key] ?? $default;
+            return $this->params[$key] ?? $default;
       }
 }
-
