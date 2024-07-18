@@ -44,10 +44,22 @@ class CarController
        *
        * @return void
        */
-      public function getAllCars()
+      public function getAllCars($request)
       {
+            $params = $request->getParams();
+            if(!empty($params))
+            {
+                  $page = $params['page'] ?? 1;
+                  $perPage = $params['perPage'] ?? 10;
+                  $offset = ($page - 1) * $perPage;
+                  
+                  $result = $this->carsModel->getPaginatedCars($offset, $perPage);
+                 
+                  return Response::json(["status" => "success", "message" => "Get all data in Database", "data" => $result]);
+            }
+            
             $result = $this->carsModel->getAllCars();
-            Response::json(["status" => "success", "message" => "Get all data in Database", "data" => $result]);
+            return Response::json(["status" => "success", "message" => "Get all data in Database", "data" => $result]);
       }
       
       /**
