@@ -64,7 +64,7 @@ class CarController
                   return Response::json(["status" => "success", "message" => "Work My Rest FULL Api", "data" => $result]);
             }
             
-            return Response::json(["status" => "success", "message" => "This id not found in Base", "data" => '']);
+            return Response::json(["status" => "success", "message" => "This id not found in Base", "data" => []]);
       }
       
       /**
@@ -162,9 +162,9 @@ class CarController
             ], 400);
       }
       
-      public function deleteCar($id)
+      public function deleteCar($request, $id)
       {
-            if($this->carsModel->del($param, $id))
+            if($this->carsModel->del($id))
             {
                   return Response::json([
                         'status' => 'success',

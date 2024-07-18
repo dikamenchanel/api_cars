@@ -186,6 +186,7 @@ class CarsModel extends DataBase
        */
       public function del($id)
       {
+            var_dump($id);
             return $this->delete("cars", "id = {$id}");
       }
 }
