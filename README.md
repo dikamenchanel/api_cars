@@ -27,7 +27,7 @@ Returns a empty array, start page.
     - GET
     - ```url /cars ```
 
-- **Parameters**
+- **Parameters for Pagination**
     - ``` page ``` (integer, optional): Serial page.
     - ``` perPage ``` (integer, optional): Number of elements on the page.
   
