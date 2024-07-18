@@ -18,7 +18,62 @@ class CarsModel extends DataBase
       function __construct()
       {
             parent::__construct();
+            $this->checkAndCreateTable();
       }
+     
+      
+      /**
+       * Checks if the cars table exists and creates it if it doesn't.
+       */
+      private function checkAndCreateTable()
+      {
+            try {
+                  $sql = "
+                  SELECT 1 
+                  FROM information_schema.tables 
+                  WHERE table_schema = :database_name 
+                  AND table_name = :table_name
+                  ";
+                  
+                  $params = [
+                        ':database_name' => MYSQL_BASE,
+                        ':table_name' => 'cars'
+                  ];
+                  
+                  $stmt = $this->query($sql, $params);
+                  
+                  if ($stmt->fetchColumn() === false) {
+                        $this->createCarsTable();
+                  }
+            } catch (PDOException $e) {
+                  die("Error checking or creating cars table: " . $e->getMessage());
+            }
+      }
+      
+      /**
+       * Creates the cars table.
+       */
+      private function createCarsTable()
+      {
+            try {
+                  $sql = "
+                  CREATE TABLE cars (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        url VARCHAR(255) ,
+                        brand VARCHAR(100) NOT NULL,
+                        model VARCHAR(100) ,
+                        year INT,
+                        price DECIMAL(10, 2),
+                        images TEXT
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+                  
+                  $this->query($sql);
+            } catch (PDOException $e) {
+                  die("Error creating cars table: " . $e->getMessage());
+            }
+      }
+      
+      
       
       /**
        * Retrieves all cars from the database.
@@ -98,5 +153,39 @@ class CarsModel extends DataBase
             }
             
             return $this->selectMany($sql, $params);
+      }
+      
+      /**
+       * Converts images field of the car data to an array of image URLs.
+       *
+       * @param mixed $data The car data, typically retrieved from the database.
+       * @return array The modified car data with images field as an array of URLs.
+       */
+      public function add($data)
+      {            
+            return $this->insert('cars', $data);
+      }
+      
+      /**
+       * Converts images field of the car data to an array of image URLs.
+       *
+       * @param mixed $data The car data, typically retrieved from the database.
+       * @return array The modified car data with images field as an array of URLs.
+       */
+      public function edit($data, $id)
+      {
+            return $this->update('cars', $data, "id = {$id}");
+      }
+      
+      
+      /**
+       * Converts images field of the car data to an array of image URLs.
+       *
+       * @param mixed $data The car data, typically retrieved from the database.
+       * @return array The modified car data with images field as an array of URLs.
+       */
+      public function del($id)
+      {
+            return $this->delete("cars", "id = {$id}");
       }
 }

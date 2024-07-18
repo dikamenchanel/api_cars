@@ -6,70 +6,100 @@ namespace Core;
  * Class Request
  * 
  * Represents an HTTP request object, providing methods to retrieve
- * path, HTTP method, query parameters, and body parameters.
+ * path, HTTP method, and parameters (query, body, and raw input).
  */
 class Request
 {
       /**
        * @var string The path of the request URI.
        */
-      private $path;
+      private string $path;
       
       /**
        * @var string The HTTP method of the request (e.g., GET, POST, PUT, DELETE).
        */
-      private $method;
+      private string $method;
       
       /**
-       * @var array The query parameters parsed from the request URI.
+       * @var array All parameters parsed from the request (query, body, and raw input).
        */
-      private $queryParams = [];
+      private array $params;
       
       /**
-       * @var array The body parameters parsed from the request body (JSON format).
+       * @var string The raw input of the request body.
        */
-      private $bodyParams = [];
+      private string $rawInput;
       
       /**
        * Request constructor.
-       * Initializes the request object by parsing the URI, method, query parameters,
-       * and body parameters from the PHP environment.
+       * Initializes the request object by parsing the URI, method, and parameters
+       * from the PHP environment. It also automatically sanitizes and validates
+       * parameters to prevent XSS attacks.
        */
       public function __construct()
       {
-            $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $this->method = $_SERVER['REQUEST_METHOD'];
-            $this->queryParams = $this->parseQueryParams();
-            $this->bodyParams = $this->parseBodyParams();
+            $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+            $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+            $this->params = $this->parseParams();
+            $this->sanitizeAndValidateParams();
       }
       
       /**
-       * Parses the query parameters from the request URI.
+       * Parses all parameters from the request (query, body, and raw input).
        *
-       * @return array The parsed query parameters.
+       * @return array The parsed parameters.
        */
-      private function parseQueryParams()
+      private function parseParams(): array
       {
-            $queryParams = [];
-            if (isset($_SERVER['QUERY_STRING'])) {
+            $params = [];
+            
+            // Parse query parameters
+            if (!empty($_SERVER['QUERY_STRING'])) {
                   parse_str($_SERVER['QUERY_STRING'], $queryParams);
+                  $params = array_merge($params, $queryParams);
             }
-            return $queryParams;
+            
+            // Parse body parameters
+            $this->rawInput = file_get_contents('php://input');
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            
+            if ($contentType === 'application/json') {
+                  $bodyParams = json_decode($this->rawInput, true);
+                  if (json_last_error() === JSON_ERROR_NONE) {
+                        $params = array_merge($params, $bodyParams);
+                  }
+            } elseif ($contentType === 'application/x-www-form-urlencoded') {
+                  parse_str($this->rawInput, $bodyParams);
+                  $params = array_merge($params, $bodyParams);
+            } elseif (strpos($contentType, 'multipart/form-data') === 0) {
+                  $params = array_merge($params, $_POST);
+            }
+            
+            return $params;
       }
       
       /**
-       * Parses the body parameters from the request body (assumes JSON format).
+       * Sanitizes a string to prevent XSS attacks.
        *
-       * @return array The parsed body parameters.
+       * @param string $input The string to sanitize.
+       * @return string The sanitized string.
        */
-      private function parseBodyParams()
+      private function sanitizeString(string $input): string
       {
-            $bodyParams = [];
-            $input = file_get_contents('php://input');
-            if ($input) {
-                  $bodyParams = json_decode($input, true);
+            return htmlspecialchars($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      }
+      
+      /**
+       * Validates and sanitizes all parameters to prevent XSS attacks.
+       */
+      private function sanitizeAndValidateParams(): void
+      {
+            foreach ($this->params as $key => $value) {
+                  if (is_string($value)) {
+                        $this->params[$key] = $this->sanitizeString($value);
+                  }
+                  // Additional validation logic can be added here for specific types or formats
             }
-            return $bodyParams;
       }
       
       /**
@@ -77,7 +107,7 @@ class Request
        *
        * @return string The request path.
        */
-      public function getPath()
+      public function getPath(): string
       {
             return $this->path;
       }
@@ -87,46 +117,31 @@ class Request
        *
        * @return string The HTTP method (GET, POST, PUT, DELETE, etc.).
        */
-      public function getMethod()
+      public function getMethod(): string
       {
             return $this->method;
       }
       
       /**
-       * Retrieves the query parameters from the request URI.
+       * Retrieves all parameters from the request.
        *
-       * @return array The query parameters.
+       * @return array The parameters.
        */
-      public function getQueryParams()
+      public function getParams(): array
       {
-            return $this->queryParams;
+            return $this->params;
       }
       
       /**
-       * Retrieves the body parameters from the request body.
-       *
-       * @return array The body parameters.
-       */
-      public function getBodyParams()
-      {
-            return $this->bodyParams;
-      }
-      
-      /**
-       * Retrieves a specific parameter from either query or body parameters.
+       * Retrieves a specific parameter from the request.
        * If the parameter is not found, returns the default value.
        *
        * @param string $key The parameter key.
        * @param mixed $default The default value if parameter is not found.
        * @return mixed The value of the parameter.
        */
-      public function getParam($key, $default = null)
+      public function getParam(string $key, $default = null)
       {
-            if (isset($this->queryParams[$key])) {
-                  return $this->queryParams[$key];
-            } elseif (isset($this->bodyParams[$key])) {
-                  return $this->bodyParams[$key];
-            }
-            return $default;
+            return $this->params[$key] ?? $default;
       }
 }

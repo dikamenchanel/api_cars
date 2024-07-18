@@ -110,4 +110,73 @@ class CarController
             
             return Response::json($data, $status);
       }
+      
+      public function createCar($request)
+      {
+            $params = $request->getParams();
+           
+            if(isset($params['brand']) 
+                  && isset($params['model'])
+                  && isset($params['year'])
+                  && isset($params['price'])
+                  && isset($params['images'])
+            ){
+                  $params['url'] = strtolower(trim(str_replace('-', '', $params['brand'])));
+                  $lastInsertId = $this->carsModel->add($params);
+                  
+                  return Response::json([
+                        'status' => 'success',
+                        'message' => 'Post has been created',
+                        'data' => [ 'id' => $lastInsertId] 
+                  ]);
+            }
+            
+            return Response::json([
+                  'status' => 'error',
+                  'message' => 'The following fields are required for submitting parameters: - brand - model - year - price - images',
+                  'data' => [] 
+            ], 400);
+            
+      }
+      
+      public function updateCar($request, $id)
+      {
+            $params = $request->getParams();
+
+            if(!empty($params))
+            {
+
+                  $this->carsModel->edit($params, $id);
+             
+                  return Response::json([
+                        'status' => 'success',
+                        'message' => 'Post has been updated',
+                        'data' => [ 'id' => $id]  
+                  ]);
+            }
+            
+            return Response::json([
+                  'status' => 'error',
+                  'message' => 'There is no data to update, or there is no such record in the database',
+                  'data' => [] 
+            ], 400);
+      }
+      
+      public function deleteCar($id)
+      {
+            if($this->carsModel->del($param, $id))
+            {
+                  return Response::json([
+                        'status' => 'success',
+                        'message' => 'Entry has been deleted',
+                        'data' => [] 
+                  ]); 
+            }
+            return Response::json([
+                  'status' => 'error',
+                  'message' => 'Something went wrong, perhaps your data is not in the database',
+                  'data' => [] 
+            ],400);
+            
+      }
 }
