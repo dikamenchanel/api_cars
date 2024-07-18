@@ -49,8 +49,8 @@ class CarController
             $params = $request->getParams();
             if(!empty($params))
             {
-                  $page = $params['page'] ?? 1;
-                  $perPage = $params['perPage'] ?? 10;
+                  $page = (int)$params['page'] ?? 1;
+                  $perPage = (int)$params['perPage'] ?? 10;
                   $offset = ($page - 1) * $perPage;
                   
                   $result = $this->carsModel->getPaginatedCars($offset, $perPage);

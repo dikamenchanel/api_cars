@@ -97,7 +97,7 @@ class CarsModel extends DataBase
        */
       public function getPaginatedCars($offset, $perPage)
       {
-            return $this->selectMany("SELECT id, url, brand, model, year FROM cars LIMIT :offset :perPage", ['offset'=> $offset, 'perPage' => $perPage]);
+            return $this->selectMany("SELECT id, url, brand, model, year FROM cars LIMIT :offset :perPage", ["offset"=> $offset, "perPage" => $perPage]);
       }
       
       /**

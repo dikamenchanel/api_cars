@@ -43,7 +43,7 @@ class Database
                         }
                         $stmt->bindValue($paramName, $paramValue, $paramType);
                   }
-                  
+
                   $stmt->execute();
                   return $stmt;
                   

@@ -1,0 +1,6 @@
+127.0.0.1 - - [18/Jul/2024:18:53:39 +0300] "GET / HTTP/1.0" 200 377 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+127.0.0.1 - - [18/Jul/2024:18:53:40 +0300] "GET /favicon.ico HTTP/1.0" 404 364 "http://api_old.test/" "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+127.0.0.1 - - [18/Jul/2024:18:53:49 +0300] "GET /cars HTTP/1.0" 200 4889 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+127.0.0.1 - - [18/Jul/2024:18:53:49 +0300] "GET /favicon.ico HTTP/1.0" 404 364 "http://api_old.test/cars" "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+127.0.0.1 - - [18/Jul/2024:18:59:41 +0300] "GET / HTTP/1.0" 200 377 "-" "PostmanRuntime/7.40.0"
+127.0.0.1 - - [18/Jul/2024:18:59:48 +0300] "GET /cars HTTP/1.0" 200 4889 "-" "PostmanRuntime/7.40.0"
