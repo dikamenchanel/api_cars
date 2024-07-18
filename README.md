@@ -100,7 +100,6 @@ Returns a empty array, start page.
 ```
 
 
-
 ### Filter Cars
 
 #### Filters cars based on optional parameters.
@@ -275,9 +274,12 @@ Returns a empty array, start page.
 
 ## Error Default Responses
 
+### Error Responses
+
+
 - **Response**
 ```json
-{
+
   "status" : "error",
   "message" : "Url Not Found",
   "data" : [] 
