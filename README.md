@@ -279,7 +279,7 @@ Returns a empty array, start page.
 
 - **Response**
 ```json
-
+{
   "status" : "error",
   "message" : "Url Not Found",
   "data" : [] 
