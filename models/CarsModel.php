@@ -85,6 +85,21 @@ class CarsModel extends DataBase
             return $this->selectMany("SELECT id, url, brand, model, year FROM cars");
       }
       
+      
+      
+      
+      /**
+       * Fetches paginated cars from the database.
+       *
+       * @param int $offset Офсет выборки
+       * @param int $perPage Количество записей на странице
+       * @return array Массив данных автомобилей
+       */
+      public function getPaginatedCars($offset, $perPage)
+      {
+            return $this->selectMany("SELECT id, url, brand, model, year FROM cars LIMIT :offset :perPage", ['offset'=> $offset, 'perPage' => $perPage]);
+      }
+      
       /**
        * Retrieves a car by its ID from the database.
        *
