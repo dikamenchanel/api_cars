@@ -88,6 +88,18 @@ Returns a empty array, start page.
 }
 ```
 
+#### Error Responses
+
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "This id not found in Base",
+  "data" : [] 
+}
+```
+
+
 
 ### Filter Cars
 
@@ -127,6 +139,29 @@ Returns a empty array, start page.
 }
 ```
 
+#### Error Responses
+
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "No cars found for the given parameters.",
+  "data" : [] 
+}
+```
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "No parameters used. Use at least one set of parameters: fromPrice/toPrice or fromYear/toYear, and optionally mark.",
+  "data" : [] 
+}
+```
+
+
+
+
+
 ### Create Car
 
 #### Create car based on required and optional parameters.
@@ -135,11 +170,12 @@ Returns a empty array, start page.
     - ```url /cars/add ```
 
 - **Parameters**
-    - ``` brand ``` (string, required): Brand of the car.
-    - ``` model ``` (string, required): Model of the car.
-    - ``` price ``` (float, optional):  Price of the car.
-    - ``` year ``` (integer, optional): Year of the car.
-    - ``` images ``` (string, optional): Array names cars convert to string "car1.jpg, car2.jpg, car3.jpg, car4.jpg". 
+    - *Query Body Params*
+      - ``` brand ``` (string, required): Brand of the car.
+      - ``` model ``` (string, required): Model of the car.
+      - ``` price ``` (float, optional):  Price of the car.
+      - ``` year ``` (integer, optional): Year of the car.
+      - ``` images ``` (string, optional): Array names cars convert to string "car1.jpg, car2.jpg, car3.jpg, car4.jpg". 
 
 - **Response**
    - Return ``` id ``` Insert data
@@ -148,6 +184,17 @@ Returns a empty array, start page.
   "status": "success",
   "message": "Post has been created",
   "data": ["id": 1]
+}
+```
+
+#### Error Responses
+
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "The following fields are required for submitting parameters: - brand - model - year - price - images",
+  "data" : [] 
 }
 ```
 
@@ -161,11 +208,15 @@ Returns a empty array, start page.
     - ```url /cars/edit/{id} ```
 
 - **Parameters**
-    - ``` brand ``` (string, optional): Brand of the car.
-    - ``` model ``` (string, optional): Model of the car.
-    - ``` price ``` (float, optional):  Price of the car.
-    - ``` year ``` (integer, optional): Year of the car.
-    - ``` images ``` (string, optional): Array names cars convert to string "car1.jpg, car2.jpg, car3.jpg, car4.jpg". 
+    - *Query String*
+      - ``` id ``` (integer): ID of the car to retrieve.
+    
+    - *Query Body Params*
+      - ``` brand ``` (string, optional): Brand of the car.
+      - ``` model ``` (string, optional): Model of the car.
+      - ``` price ``` (float, optional):  Price of the car.
+      - ``` year ``` (integer, optional): Year of the car.
+      - ``` images ``` (string, optional): Array names cars convert to string "car1.jpg, car2.jpg, car3.jpg, car4.jpg". 
 
 - **Response**
    - Return ``` id ``` Update data
@@ -177,6 +228,18 @@ Returns a empty array, start page.
 }
 ```
 
+#### Error Responses
+
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "There is no data to update, or there is no such record in the database",
+  "data" : [] 
+}
+```
+
+
 ### Delete Car
 
 #### Delete car.
@@ -185,7 +248,8 @@ Returns a empty array, start page.
     - ```url /cars/del/{id} ```
 
 - **Parameters**
-    - None
+    - *Query String*
+      - ``` id ``` (integer): ID of the car to retrieve.
  
 
 - **Response**
@@ -197,18 +261,28 @@ Returns a empty array, start page.
 }
 ```
 
-
-### Error Responses
+#### Error Responses
 
 - **Response**
 ```json
 {
-  "status": "error",
-  "message": "URL Not Found"
+  "status" : "error",
+  "message" : "Something went wrong, perhaps your data is not in the database",
+  "data" : [] 
 }
 ```
 
 
+## Error Default Responses
+
+- **Response**
+```json
+{
+  "status" : "error",
+  "message" : "Url Not Found",
+  "data" : [] 
+}
+```
 
 ### Example Usage
 ```bash

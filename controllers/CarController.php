@@ -36,7 +36,7 @@ class CarController
        */
       public function index()
       {
-            return Response::json(["status" => "success", "message" => "Work My Rest FULL Api", "data" => []]);
+            return Response::json(["status" => "success", "message" => "Start default url. Work RestFULL Api", "data" => []]);
       }
       
       /**
@@ -47,7 +47,7 @@ class CarController
       public function getAllCars()
       {
             $result = $this->carsModel->getAllCars();
-            Response::json(["status" => "success", "message" => "", "data" => $result]);
+            Response::json(["status" => "success", "message" => "Get all data in Database", "data" => $result]);
       }
       
       /**
@@ -61,7 +61,7 @@ class CarController
       {
             $result = $this->carsModel->imagesToArray($this->carsModel->getCartById($id));
             if ($result) {
-                  return Response::json(["status" => "success", "message" => "Work My Rest FULL Api", "data" => $result]);
+                  return Response::json(["status" => "success", "message" => "Get one car by id", "data" => $result]);
             }
             
             return Response::json(["status" => "success", "message" => "This id not found in Base", "data" => []]);
